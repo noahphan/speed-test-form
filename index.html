@@ -388,15 +388,25 @@ function submitResultsToGoogleSheets() {
         timestamp: new Date().toISOString()
     };
     
-    // Send data to Google Sheets via the Apps Script Web App
-    fetch('https://script.google.com/a/macros/invisible.email/s/AKfycbwKStYkRv8IyUiKIP-jK7sa-O_frwmLghooYQKjB6orF3pqiouv-DiDx1ig_Iu8kHg/exec', {
+    // Use your NEW deployment URL here
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzEp99SYvR3o6niqOPD1czNvJeD5h1dxcW0PGksX7JPyz3hFcs-dcRN9AhJcKt--18/exec'; 
+    
+    console.log('Sending data to:', scriptURL);
+    
+    fetch(scriptURL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.status);
+        }
+        return response.json();
+    })
     .then(result => {
         console.log('Success:', result);
         results.style.display = 'none';
@@ -406,7 +416,7 @@ function submitResultsToGoogleSheets() {
         runTestBtn.disabled = false;
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Error details:', error);
         status.textContent = 'Error submitting results. Please try again.';
         submitResultsBtn.disabled = false;
     });
